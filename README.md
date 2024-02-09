@@ -11,7 +11,19 @@ investigation.
 * **Next.js**: 14.1.0
 * **zeromq.js**: 6.0.0-beta.19
 
+> [!NOTE]
+> It also happens in macOS 14.1.1
+
 ## Reproduction Steps
+
+### Manually
+
+Basically create a next app `npx create-next-app@latest` with all the defaults, install
+zeromq `npm install zeromq@6.0.0-beta.19`, import it anywhere in `app/page.tsx` (e.g.
+`import { Push } from "zeromq";` and `const sock = new Push();` anywhere in your file),
+start the development server `npm run dev` and visit `http://localhost:3000`.
+
+### Reproducible Container
 
 1. Clone this repository `git@github.com:eulersson/zeromq.js-node.js-errors.git`
 2. Build the Debian Docker container provided `docker build -t zeromq-nextjs`
@@ -20,6 +32,8 @@ investigation.
 
 - **Result**: Many "No native build was found for" errors server logs and an error screen on the browser.
 - **Should**: Not error.
+
+![Error Screenshot](./error-screenshot.png)
 
 Maybe it's related to the way Next.js compiles the pacakges?
 
