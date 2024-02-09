@@ -1,36 +1,289 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# zeromq.js failing on Next.js
 
-## Getting Started
+This repository demonstrates the inability the TypeScript zeromq.js bindings on the
+context of a Next.js application. I provide a reproducible docker container for
+investigation.
 
-First, run the development server:
+## Environment
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+* **OS**: Debian GNU/Linux 12 (bookworm)
+* **Node.js**: 20.11.0 (LTS)
+* **Next.js**: 14.1.0
+* **zeromq.js**: 6.0.0-beta.19
+
+## Reproduction Steps
+
+1. Clone this repository `git@github.com:eulersson/zeromq.js-node.js-errors.git`
+2. Build the Debian Docker container provided `docker build -t zeromq-nextjs`
+3. Run the Next.js development server container `docker run --rm -it -p 3000:3000 nextjs-zeromq`
+4. Visit `http://localhost:3000` on your host browser.
+
+- **Result**: Many "No native build was found for" errors server logs and an error screen on the browser.
+- **Should**: Not error.
+
+Maybe it's related to the way Next.js compiles the pacakges?
+
+> [!NOTE]
+> The `zeromq@5` package fails too (if you try installing it you need to
+> `apt-get update && apt-get install python make cmake g++` first).
+
+## Error Log
+
 ```
+root@3ae29fabb9db:/app# npm run dev
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> my-app@0.1.0 dev
+> next dev
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ▲ Next.js 14.1.0
+   - Local:        http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+ ✓ Ready in 2.3s
+ ○ Compiling /not-found ...
 
-## Learn More
+warn - No utility classes were detected in your source files. If this is unexpected, double-check the `content` option in your Tailwind CSS configuration.
+warn - https://tailwindcss.com/docs/content-configuration
+ ✓ Compiled / in 7.3s (471 modules)
+Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
 
-To learn more about Next.js, take a look at the following resources:
+    at load.path (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:50:11)
+    at load (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:20:32)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/native.js:6:123)
+    at (rsc)/./node_modules/zeromq/lib/native.js (/app/.next/server/vendor-chunks/zeromq.js:40:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/index.js:7:16)
+    at (rsc)/./node_modules/zeromq/lib/index.js (/app/.next/server/vendor-chunks/zeromq.js:30:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async eq (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:402260)
+    at async tr (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:405987)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406537)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406668)
+    at async tu (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2057)
+    at async /app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2564 {
+  digest: '3408682970'
+}
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async Promise.all (index 0)
+null
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async Promise.all (index 0)
+digest: "1453847562"
+null
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
 
-## Deploy on Vercel
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+null
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    at load.path (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:50:11)
+    at load (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:20:32)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/native.js:6:123)
+    at (rsc)/./node_modules/zeromq/lib/native.js (/app/.next/server/vendor-chunks/zeromq.js:40:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/index.js:7:16)
+    at (rsc)/./node_modules/zeromq/lib/index.js (/app/.next/server/vendor-chunks/zeromq.js:30:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async eq (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:402260)
+    at async tr (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:405987)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406537)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406668)
+    at async tu (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2057)
+    at async /app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2564 {
+  digest: '3408682970',
+  page: '/'
+}
+null
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async Promise.all (index 0)
+null
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
+
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async Promise.all (index 0)
+digest: "2342305956"
+null
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
+
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+null
+Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
+
+    at load.path (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:50:11)
+    at load (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:20:32)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/native.js:6:123)
+    at (rsc)/./node_modules/zeromq/lib/native.js (/app/.next/server/vendor-chunks/zeromq.js:40:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/index.js:7:16)
+    at (rsc)/./node_modules/zeromq/lib/index.js (/app/.next/server/vendor-chunks/zeromq.js:30:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async eq (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:402260)
+    at async tr (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:405987)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406537)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406668)
+    at async tu (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2057)
+    at async /app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2564 {
+  digest: '3408682970'
+}
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
+
+    at load.path (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:50:11)
+    at load (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:20:32)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/native.js:6:123)
+    at (rsc)/./node_modules/zeromq/lib/native.js (/app/.next/server/vendor-chunks/zeromq.js:40:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/index.js:7:16)
+    at (rsc)/./node_modules/zeromq/lib/index.js (/app/.next/server/vendor-chunks/zeromq.js:30:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async eq (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:402260)
+    at async tr (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:405987)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406537)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406668)
+    at async tu (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2057)
+    at async /app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2564 {
+  digest: '3408682970',
+  page: '/'
+}
+null
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1397ms (619 modules)
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
+
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async Promise.all (index 0)
+null
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
+
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async Promise.all (index 0)
+digest: "2342305956"
+null
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
+
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+null
+Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
+
+    at load.path (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:50:11)
+    at load (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:20:32)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/native.js:6:123)
+    at (rsc)/./node_modules/zeromq/lib/native.js (/app/.next/server/vendor-chunks/zeromq.js:40:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/index.js:7:16)
+    at (rsc)/./node_modules/zeromq/lib/index.js (/app/.next/server/vendor-chunks/zeromq.js:30:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async eq (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:402260)
+    at async tr (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:405987)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406537)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406668)
+    at async tu (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2057)
+    at async /app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2564 {
+  digest: '3408682970'
+}
+ ⨯ node_modules/@aminya/node-gyp-build/index.js (60:8) @ load.path
+ ⨯ Error: No native build was found for platform=linux arch=x64 runtime=node abi=115 uv=1 libc=glibc node=20.11.0 webpack=true
+    loaded from: /app/.next/server
+
+    at load.path (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:50:11)
+    at load (webpack-internal:///(rsc)/./node_modules/@aminya/node-gyp-build/index.js:20:32)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/native.js:6:123)
+    at (rsc)/./node_modules/zeromq/lib/native.js (/app/.next/server/vendor-chunks/zeromq.js:40:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./node_modules/zeromq/lib/index.js:7:16)
+    at (rsc)/./node_modules/zeromq/lib/index.js (/app/.next/server/vendor-chunks/zeromq.js:30:1)
+    at __webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at eval (webpack-internal:///(rsc)/./app/page.tsx:7:64)
+    at (rsc)/./app/page.tsx (/app/.next/server/app/page.js:217:1)
+    at Function.__webpack_require__ (/app/.next/server/webpack-runtime.js:33:42)
+    at async eq (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:402260)
+    at async tr (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:405987)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406537)
+    at async tn (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:406668)
+    at async tu (/app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2057)
+    at async /app/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:2564 {
+  digest: '3408682970',
+  page: '/'
+}
+null
+```
