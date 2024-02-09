@@ -33,7 +33,7 @@ start the development server `npm run dev` and visit `http://localhost:3000`.
 - **Result**: Many "No native build was found for" errors server logs and an error screen on the browser.
 - **Should**: Not error.
 
-![Error Screenshot](./error-screenshot.png)
+![Error Screenshot](./screenshot-error.png)
 
 Maybe it's related to the way Next.js compiles the pacakges?
 
